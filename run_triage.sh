@@ -30,6 +30,6 @@ fi
 
 # Run the agent
 echo "Running AWSCC triage agent..."
-python awscc_triage_multiagent.py
+python main.py
 
 echo "Triage complete!"

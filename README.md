@@ -12,7 +12,9 @@
 
 🤖 **Automated Analysis**: Runs complete Terraform lifecycle (`init`, `validate`, `plan`, `apply`, `destroy`) to reproduce reported problems
 
-🧹 **Smart Cleanup**: Automatically removes large Terraform files (.terraform/, state files) to save disk space while preserving .tf files for review
+🧹 **Smart Cleanup**: Automatically removes large Terraform files (.terraform/, state files) to save disk space while preserving .tf files and directories for review
+
+🏗️ **Modular Architecture**: Clean separation of concerns with specialized agent modules in dedicated directory structure
 
 📋 **Documentation**: Generates comprehensive markdown reports with test results, error analysis, and reproduction steps
 
@@ -45,7 +47,7 @@
    - 📥 Fetch qualifying issues using GitHub MCP
    - 🔄 Get latest AWSCC provider version using Terraform MCP
    - 🧪 Extract and test configurations
-   - 🧹 Clean up large files and AWS resources
+   - 🧹 Clean up large files and AWS resources while preserving .tf files
    - 📊 Generate comprehensive analysis reports
 
 ## ⚙️ Configuration
@@ -80,7 +82,7 @@ The agent behavior is controlled by `agent_config.json`:
 PRISM generates:
 - 📁 **Individual test directories**: `issue_<id>/` for each analyzed issue with preserved .tf files
 - 📋 **Triage reports**: `triage_issue_<id>.md` with detailed analysis
-- 🧹 **Clean workspace**: Large Terraform files automatically removed after testing
+- 🧹 **Clean workspace**: Large Terraform files (.terraform/, state files) automatically removed after testing while preserving .tf files for review
 
 ## 📋 Requirements
 
@@ -93,10 +95,27 @@ PRISM generates:
 
 ## 🏗️ Architecture
 
-PRISM uses a multi-agent MCP-enabled approach:
-- 🎯 **Orchestrator Agent**: Coordinates the overall workflow and delegates tasks
+PRISM uses a multi-agent MCP-enabled approach with a clean modular structure:
+
+### Project Structure
+```
+prism/
+├── main.py                    # Main entry point
+├── agents/                    # Agent modules directory
+│   ├── __init__.py           # Package initialization
+│   ├── orchestrator.py       # Main coordination agent
+│   ├── github_agent.py       # GitHub specialist agent
+│   ├── terraform_agent.py    # Terraform specialist agent
+│   └── analysis_agent.py     # Analysis specialist agent
+├── agent_config.json         # Configuration file
+├── run_triage.sh            # Execution script
+└── requirements.txt         # Python dependencies
+```
+
+### Agent Responsibilities
+- 🎯 **Orchestrator Agent**: Coordinates the overall workflow and delegates tasks with proper resource cleanup
 - 🔗 **GitHub Agent**: Uses GitHub MCP server to fetch and analyze issues
-- 🔧 **Terraform Agent**: Uses Terraform MCP server and shell tools for testing with latest provider versions
+- 🔧 **Terraform Agent**: Uses Terraform MCP server and shell tools for testing with latest provider versions, preserves .tf files while cleaning up large state files
 - 📊 **Analysis Agent**: Uses AWS Documentation MCP server for expert analysis and report generation
 
 Built with the Strands SDK for robust agent orchestration, MCP servers for external integrations, and AWS Bedrock for intelligent analysis.
@@ -105,4 +124,3 @@ Built with the Strands SDK for robust agent orchestration, MCP servers for exter
 
 - 📦 **S3 Archival**: Copy analyzed configurations and results to S3 bucket for long-term storage and historical analysis
 - 📊 **Issue Tracking**: Implement database/file system to track previously analyzed issues and avoid duplicate processing when GitHub API returns same issues
-- **AgentCore integration** : Create infra components to use this in Bedrock AgentCore.
