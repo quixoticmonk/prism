@@ -4,19 +4,13 @@
 
 ## 🎯 What PRISM Does
 
-🔎 **Issue Discovery**: Automatically fetches issues labeled `needs-triage` from the terraform-provider-awscc repository
-
-🚀 **Latest Provider Testing**: Always uses the latest AWSCC provider version for accurate testing
-
-⚙️ **Configuration Testing**: Extracts Terraform configurations from issue descriptions and tests them in isolated environments
-
-🤖 **Automated Analysis**: Runs complete Terraform lifecycle (`init`, `validate`, `plan`, `apply`, `destroy`) to reproduce reported problems
-
-🧹 **Smart Cleanup**: Automatically removes large Terraform files (.terraform/, state files) to save disk space while preserving .tf files and directories for review
-
-🏗️ **Modular Architecture**: Clean separation of concerns with specialized agent modules in dedicated directory structure
-
-📋 **Documentation**: Generates comprehensive markdown reports with test results, error analysis, and reproduction steps
+- 🔎 **Issue Discovery**: Automatically fetches issues labeled `needs-triage` from the terraform-provider-awscc repository
+- 🚀 **Latest Provider Testing**: Always uses the latest AWSCC provider version for accurate testing
+- ⚙️ **Configuration Testing**: Extracts Terraform configurations from issue descriptions and tests them in isolated environments
+- 🤖 **Automated Analysis**: Runs complete Terraform lifecycle (`init`, `validate`, `plan`, `apply`, `destroy`) to reproduce reported problems
+- 🧹 **Smart Cleanup**: Automatically removes large Terraform files (.terraform/, state files) to save disk space while preserving .tf files and directories for review
+- 🏗️ **Modular Architecture**: Clean separation of concerns with specialized agent modules in dedicated directory structure
+- 📋 **Documentation**: Generates comprehensive markdown reports with test results, error analysis, and reproduction steps
 
 ## ✨ Key Features
 
@@ -31,9 +25,9 @@
 
 ## 🚀 Quick Start
 
-1. **Setup Environment**:
+1. **Install Dependencies**:
    ```bash
-   ./run_triage.sh
+   uv sync
    ```
 
 2. **Configure Settings** (optional):
@@ -43,6 +37,10 @@
    - 🧠 Model configuration
 
 3. **Run Analysis**:
+   ```bash
+   ./run_triage.sh
+   ```
+   
    The system will automatically:
    - 📥 Fetch qualifying issues using GitHub MCP
    - 🔄 Get latest AWSCC provider version using Terraform MCP
@@ -111,7 +109,7 @@ prism/
 ├── uv.lock                  # Dependency lock file
 ├── .python-version          # Python version specification
 ├── run_triage.sh            # Execution script
-└── requirements.txt         # Legacy (replaced by pyproject.toml)
+└── .gitignore               # Git ignore patterns
 ```
 
 ### Agent Responsibilities
@@ -126,3 +124,4 @@ Built with the Strands SDK for robust agent orchestration, MCP servers for exter
 
 - 📦 **S3 Archival**: Copy analyzed configurations and results to S3 bucket for long-term storage and historical analysis
 - 📊 **Issue Tracking**: Implement database/file system to track previously analyzed issues and avoid duplicate processing when GitHub API returns same issues
+- 🔄 **GitHub Integration**: Add workflow to update triaged issues back on the GitHub repo with analysis results and status updates
