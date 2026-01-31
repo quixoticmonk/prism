@@ -17,7 +17,7 @@
       "exclude": ["resource-suppression"]
     },
     "max_age_days": 10,
-    "max_issues": 1
+    "max_issues": 2
   },
   "terraform": {
     "providers": {
