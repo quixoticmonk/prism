@@ -86,7 +86,7 @@ PRISM generates:
 
 ## 📋 Requirements
 
-- 🐍 Python 3.12+
+- 🐍 Python 3.12+ with [uv](https://docs.astral.sh/uv/) package manager
 - 🏗️ Terraform CLI
 - ☁️ AWS CLI configured
 - 🔗 GitHub access (for MCP server)
@@ -107,9 +107,11 @@ prism/
 │   ├── github_agent.py       # GitHub specialist agent
 │   ├── terraform_agent.py    # Terraform specialist agent
 │   └── analysis_agent.py     # Analysis specialist agent
-├── agent_config.json         # Configuration file
+├── pyproject.toml           # Project configuration and dependencies
+├── uv.lock                  # Dependency lock file
+├── .python-version          # Python version specification
 ├── run_triage.sh            # Execution script
-└── requirements.txt         # Python dependencies
+└── requirements.txt         # Legacy (replaced by pyproject.toml)
 ```
 
 ### Agent Responsibilities

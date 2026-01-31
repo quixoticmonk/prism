@@ -1,0 +1,11 @@
+[project]
+name = "prism"
+version = "0.1.0"
+description = "Provider Resource Issue Scanning & Monitoring"
+requires-python = ">=3.12"
+dependencies = [
+    "strands-agents>=0.2.5",
+    "strands-agents-tools>=0.2.19",
+    "mcp>=1.0.0",
+    "requests>=2.31.0",
+]

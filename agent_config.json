@@ -17,12 +17,12 @@
       "exclude": ["resource-suppression"]
     },
     "max_age_days": 10,
-    "max_issues": 2
+    "max_issues": 1
   },
   "terraform": {
     "providers": {
       "awscc": "~> 1.0",
-      "aws": "~> 5.0"
+      "aws": "~> 6.0"
     }
   },
   "output": {

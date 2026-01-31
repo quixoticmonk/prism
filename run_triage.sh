@@ -7,19 +7,9 @@ set -e
 
 echo "Starting PRISM - Provider Resource Issue Scanning & Monitoring"
 
-# Check if virtual environment exists
-if [ ! -d "venv" ]; then
-    echo "Creating virtual environment..."
-    python3 -m venv venv
-fi
-
-# Activate virtual environment
-echo "Activating virtual environment..."
-source venv/bin/activate
-
-# Install dependencies
-echo "Installing dependencies..."
-pip install -r requirements.txt
+# Install dependencies with uv
+echo "Installing dependencies with uv..."
+uv sync
 
 # Check if Terraform is installed
 if ! command -v terraform &> /dev/null; then
@@ -30,6 +20,6 @@ fi
 
 # Run the agent
 echo "Running AWSCC triage agent..."
-python main.py
+uv run python main.py
 
 echo "Triage complete!"
