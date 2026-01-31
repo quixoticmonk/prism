@@ -100,3 +100,8 @@ PRISM uses a multi-agent MCP-enabled approach:
 - **Analysis Agent**: Uses AWS Documentation MCP server for expert analysis and report generation
 
 Built with the Strands SDK for robust agent orchestration, MCP servers for external integrations, and AWS Bedrock for intelligent analysis.
+
+## TODO
+
+- **S3 Archival**: Copy analyzed configurations and results to S3 bucket for long-term storage and historical analysis
+- **Issue Tracking**: Implement database/file system to track previously analyzed issues and avoid duplicate processing when GitHub API returns same issues

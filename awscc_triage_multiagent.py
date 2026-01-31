@@ -206,8 +206,9 @@ You manage three specialized agents:
 Your workflow:
 1. Delegate to GitHub Agent to fetch recent issues
 2. For each issue, delegate to Terraform Agent to test configurations
-3. Delegate to Analysis Agent to analyze results and create reports
-4. Ensure proper cleanup of AWS resources
+3. MANDATORY: After each terraform test, call self.cleanup_terraform_files(issue_id)
+4. Delegate to Analysis Agent to analyze results and create reports
+5. Ensure proper cleanup of AWS resources
 
 Use your delegation tools to coordinate the specialized agents and ensure comprehensive triage."""
         )
@@ -242,21 +243,61 @@ CRITICAL REQUIREMENT:
 
 WORKFLOW:
 1. Delegate to GitHub Agent to fetch recent issues (limit to {max_issues} issues)
-2. For each issue found, delegate to Terraform Agent to:
-   - First get the latest AWSCC provider version using Terraform MCP tools
-   - Create test configurations using the latest provider version
-   - Test the configurations with terraform commands
-   - ALWAYS clean up large terraform files after testing
+2. For each issue found:
+   a. Delegate to Terraform Agent to:
+      - First get the latest AWSCC provider version using Terraform MCP tools
+      - Create test configurations using the latest provider version
+      - Test the configurations with terraform commands
+   b. MANDATORY: Call cleanup_terraform_files(issue_id) immediately after terraform testing
+   c. Delegate to Analysis Agent to analyze results and create reports
+      - Generate ONE comprehensive report per issue as triage_issue_<id>.md
+      - Avoid creating multiple reports for the same issue
 3. Delegate to Analysis Agent to create detailed reports
 4. Ensure all AWS resources are properly cleaned up
 
 Start the triage process by delegating to the GitHub Agent with the above configuration."""
             
-            return self.orchestrator(prompt)
+            # Execute with cleanup protection
+            issues_processed = []
+            try:
+                result = self.orchestrator(prompt)
+                return result
+            finally:
+                # Always attempt cleanup of any terraform files that might remain
+                import os
+                for item in os.listdir('.'):
+                    if item.startswith('issue_') and os.path.isdir(item):
+                        issue_id = item.replace('issue_', '')
+                        self.cleanup_terraform_files(issue_id)
+                        print(f"Final cleanup performed for {item} (kept .tf files)")
         finally:
             # Cleanup MCP clients
             self._cleanup_mcp_clients()
     
+    def cleanup_terraform_files(self, issue_id):
+        """Clean up large terraform files after testing, keep .tf files for review"""
+        import subprocess
+        import os
+        
+        issue_dir = f"issue_{issue_id}"
+        if os.path.exists(issue_dir):
+            cleanup_commands = [
+                f"rm -rf {issue_dir}/.terraform",
+                f"rm -f {issue_dir}/.terraform.lock.hcl",
+                f"rm -f {issue_dir}/terraform.tfstate",
+                f"rm -f {issue_dir}/terraform.tfstate.backup"
+            ]
+            
+            for cmd in cleanup_commands:
+                try:
+                    subprocess.run(cmd.split(), check=False)
+                    print(f"Cleaned up: {cmd}")
+                except Exception as e:
+                    print(f"Cleanup warning: {e}")
+            
+            # Keep .tf files for review and S3 archival
+            print(f"Preserved .tf files in {issue_dir} for review")
+
     def _cleanup_mcp_clients(self):
         """Properly cleanup MCP clients to avoid shutdown errors"""
         try:
@@ -287,7 +328,7 @@ if __name__ == "__main__":
     import sys
     
     def signal_handler(sig, frame):
-        print("\n🛑 Shutting down gracefully...")
+        print("\nShutting down gracefully...")
         sys.exit(0)
     
     signal.signal(signal.SIGINT, signal_handler)
