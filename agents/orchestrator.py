@@ -22,66 +22,68 @@ class PRISMOrchestrator:
                 config = json.load(f)
         else:
             config = {}
-        
+
         # Configure Bedrock model from config
         model_config = config.get("model", {})
         self.bedrock_model = BedrockModel(
-            model_id=model_config.get("model_id", "us.anthropic.claude-sonnet-4-20250514-v1:0"),
+            model_id=model_config.get(
+                "model_id", "us.anthropic.claude-sonnet-4-20250514-v1:0"
+            ),
             temperature=model_config.get("temperature", 0.3),
-            max_tokens=model_config.get("max_tokens", 4096)
+            max_tokens=model_config.get("max_tokens", 4096),
         )
-        
+
         # Initialize specialized agents
         self.github_agent = create_github_agent(self.bedrock_model)
         self.terraform_agent = create_terraform_agent(self.bedrock_model)
         self.analysis_agent = create_analysis_agent(self.bedrock_model)
-        
+
         # Create orchestrator agent with tools to manage sub-agents
         self.orchestrator = self._create_orchestrator()
-    
+
     def __enter__(self):
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.cleanup()
-    
+
     def cleanup(self):
         """Clean up agents and resources"""
         try:
-            if hasattr(self, 'github_agent'):
+            if hasattr(self, "github_agent"):
                 del self.github_agent
-            if hasattr(self, 'terraform_agent'):
+            if hasattr(self, "terraform_agent"):
                 del self.terraform_agent
-            if hasattr(self, 'analysis_agent'):
+            if hasattr(self, "analysis_agent"):
                 del self.analysis_agent
-            if hasattr(self, 'orchestrator'):
+            if hasattr(self, "orchestrator"):
                 del self.orchestrator
         except Exception:
             pass  # Ignore cleanup errors
-    
+
     @tool
     def delegate_to_github_agent(self, task: str) -> str:
         """Delegate a task to the GitHub specialist agent"""
         return self.github_agent(task)
-    
+
     @tool
     def delegate_to_terraform_agent(self, task: str) -> str:
         """Delegate a task to the Terraform specialist agent"""
         return self.terraform_agent(task)
-    
+
     @tool
     def delegate_to_analysis_agent(self, task: str) -> str:
         """Delegate a task to the Analysis specialist agent"""
         return self.analysis_agent(task)
-    
+
     def _create_orchestrator(self):
         """Create the main orchestrator agent"""
         return Agent(
             model=self.bedrock_model,
             tools=[
                 self.delegate_to_github_agent,
-                self.delegate_to_terraform_agent, 
-                self.delegate_to_analysis_agent
+                self.delegate_to_terraform_agent,
+                self.delegate_to_analysis_agent,
             ],
             system_prompt="""You are the orchestrator for AWSCC provider issue triage. 
 
@@ -97,9 +99,9 @@ Your workflow:
 4. Delegate to Analysis Agent to analyze results and create reports
 5. Ensure proper cleanup of AWS resources
 
-Use your delegation tools to coordinate the specialized agents and ensure comprehensive triage."""
+Use your delegation tools to coordinate the specialized agents and ensure comprehensive triage.""",
         )
-    
+
     def run_triage(self):
         """Run the complete triage process"""
         try:
@@ -113,7 +115,7 @@ Use your delegation tools to coordinate the specialized agents and ensure compre
             else:
                 max_issues = 1
                 max_age_days = 10
-                
+
             prompt = f"""Please coordinate a comprehensive AWSCC provider issue triage:
 
 CONFIGURATION:
@@ -142,16 +144,16 @@ WORKFLOW:
 4. Ensure all AWS resources are properly cleaned up
 
 Start the triage process by delegating to the GitHub Agent with the above configuration."""
-            
+
             # Execute with cleanup protection
             try:
                 result = self.orchestrator(prompt)
                 return result
             finally:
                 # Always attempt cleanup of any terraform files that might remain
-                for item in os.listdir('.'):
-                    if item.startswith('issue_') and os.path.isdir(item):
-                        issue_id = item.replace('issue_', '')
+                for item in os.listdir("."):
+                    if item.startswith("issue_") and os.path.isdir(item):
+                        issue_id = item.replace("issue_", "")
                         self.cleanup_terraform_files(issue_id)
                         print(f"Final cleanup performed for {item} (kept .tf files)")
         except Exception as e:
@@ -160,7 +162,7 @@ Start the triage process by delegating to the GitHub Agent with the above config
         finally:
             # Cleanup resources
             self.cleanup()
-    
+
     def cleanup_terraform_files(self, issue_id):
         """Clean up large terraform files after testing, keep .tf files for review"""
         issue_dir = f"issue_{issue_id}"
@@ -169,15 +171,15 @@ Start the triage process by delegating to the GitHub Agent with the above config
                 f"rm -rf {issue_dir}/.terraform",
                 f"rm -f {issue_dir}/.terraform.lock.hcl",
                 f"rm -f {issue_dir}/terraform.tfstate",
-                f"rm -f {issue_dir}/terraform.tfstate.backup"
+                f"rm -f {issue_dir}/terraform.tfstate.backup",
             ]
-            
+
             for cmd in cleanup_commands:
                 try:
                     subprocess.run(cmd.split(), check=False)
                     print(f"Cleaned up: {cmd}")
                 except Exception as e:
                     print(f"Cleanup warning: {e}")
-            
+
             # Keep .tf files and directory for review
             print(f"Preserved .tf files in {issue_dir}/ for review")

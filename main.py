@@ -25,21 +25,22 @@ def main():
     """Main entry point"""
     print("Multi-Agent PRISM System")
     print("=" * 50)
-    
+
     # Setup signal handlers
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
-    
+
     try:
         with PRISMOrchestrator() as orchestrator:
             response = orchestrator.run_triage()
             print(response)
-        
+
     except Exception as e:
         print(f"Error: {e}")
     finally:
         # Force cleanup any remaining resources
         import gc
+
         gc.collect()
 
 

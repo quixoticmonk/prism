@@ -9,13 +9,14 @@ from mcp import stdio_client, StdioServerParameters
 
 def create_github_agent(bedrock_model):
     """Create GitHub specialist agent"""
-    github_mcp_client = MCPClient(lambda: stdio_client(
-        StdioServerParameters(
-            command="npx",
-            args=["-y", "@modelcontextprotocol/server-github"]
+    github_mcp_client = MCPClient(
+        lambda: stdio_client(
+            StdioServerParameters(
+                command="npx", args=["-y", "@modelcontextprotocol/server-github"]
+            )
         )
-    ))
-    
+    )
+
     return Agent(
         model=bedrock_model,
         tools=[github_mcp_client],
@@ -35,5 +36,5 @@ When searching, use parameters like:
 - sort: "created"
 - direction: "desc"
 
-Extract and analyze the Terraform configurations found in issue descriptions for testing."""
+Extract and analyze the Terraform configurations found in issue descriptions for testing.""",
     )

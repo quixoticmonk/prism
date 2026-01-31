@@ -13,7 +13,7 @@ def create_terraform_file(filepath: str, content: str) -> str:
     """Create a Terraform configuration file"""
     try:
         Path(filepath).parent.mkdir(parents=True, exist_ok=True)
-        with open(filepath, 'w') as f:
+        with open(filepath, "w") as f:
             f.write(content)
         return f"Created Terraform file: {filepath}"
     except Exception as e:
@@ -23,14 +23,16 @@ def create_terraform_file(filepath: str, content: str) -> str:
 def create_terraform_agent(bedrock_model):
     """Create Terraform specialist agent"""
     from strands_tools import shell, file_read
-    
-    terraform_mcp_client = MCPClient(lambda: stdio_client(
-        StdioServerParameters(
-            command="finch",
-            args=["run", "-i", "--rm", "hashicorp/terraform-mcp-server"]
+
+    terraform_mcp_client = MCPClient(
+        lambda: stdio_client(
+            StdioServerParameters(
+                command="finch",
+                args=["run", "-i", "--rm", "hashicorp/terraform-mcp-server"],
+            )
         )
-    ))
-    
+    )
+
     return Agent(
         model=bedrock_model,
         tools=[create_terraform_file, shell, file_read, terraform_mcp_client],
@@ -65,5 +67,5 @@ CRITICAL: After each test, ALWAYS use shell tool to clean up ONLY these large fi
 IMPORTANT: DO NOT delete the issue_<issue_id> directory itself or any .tf files - these must be preserved for review.
 
 Always work in isolated test directories named issue_<issue_id> for each issue.
-Always run terraform destroy after successful apply operations to clean up AWS resources."""
+Always run terraform destroy after successful apply operations to clean up AWS resources.""",
     )
