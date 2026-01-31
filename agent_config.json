@@ -4,6 +4,12 @@
     "description": "Provider Resource Issue Scanning & Monitoring - Analyzes AWSCC provider issues and tests configurations",
     "version": "1.0.0"
   },
+  "model": {
+    "provider": "bedrock",
+    "model_id": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "temperature": 0.3,
+    "max_tokens": 4096
+  },
   "github": {
     "repo": "hashicorp/terraform-provider-awscc",
     "labels": {
