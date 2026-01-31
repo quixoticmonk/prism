@@ -1,0 +1,26 @@
+{
+  "agent": {
+    "name": "PRISM",
+    "description": "Provider Resource Issue Scanning & Monitoring - Analyzes AWSCC provider issues and tests configurations",
+    "version": "1.0.0"
+  },
+  "github": {
+    "repo": "hashicorp/terraform-provider-awscc",
+    "labels": {
+      "include": ["needs-triage"],
+      "exclude": ["resource-suppression"]
+    },
+    "max_age_days": 10,
+    "max_issues": 1
+  },
+  "terraform": {
+    "providers": {
+      "awscc": "~> 1.0",
+      "aws": "~> 5.0"
+    }
+  },
+  "output": {
+    "results_file": "triage_results.md",
+    "issues_dir": "triage_issues"
+  }
+}
