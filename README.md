@@ -122,6 +122,10 @@ Built with the Strands SDK for robust agent orchestration, MCP servers for exter
 
 ## 📝 TODO
 
-- 📦 **S3 Archival**: Copy analyzed configurations and results to S3 bucket for long-term storage and historical analysis
-- 📊 **Issue Tracking**: Implement database/file system to track previously analyzed issues and avoid duplicate processing when GitHub API returns same issues
-- 🔄 **GitHub Integration**: Add workflow to update triaged issues back on the GitHub repo with analysis results and status updates
+- 🔄 **GitHub Issue Updates**: Update GitHub issues with analysis results once complete. Functionality works but GitHub's fine-grained tokens have limitations compared to classic tokens - despite trying `issues: write` and repo-specific permissions, fine-grained tokens consistently return 403 errors
+- 📦 **S3 Storage**: Copy configuration files and analysis results to S3 bucket for deeper analysis (conditional step, nice-to-have since agents already create `issue_id` directories)
+- ☁️ **AWS AgentCore Migration**: Convert implementation to AWS AgentCore service
+- ⏰ **Scheduled Execution**: Set up weekly automated runs (implementation already filters by `needs-triage` and date limits)
+- 📊 **Issue Tracking**: Track already-processed issues using either:
+  - Storage-based tracking: Use existing issue IDs to skip duplicates
+  - Label-based tracking: Update `needs-triage` label once analysis is posted (preferred if issue metadata updates work)
