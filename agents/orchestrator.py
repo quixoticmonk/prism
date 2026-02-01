@@ -76,6 +76,18 @@ class PRISMOrchestrator:
         """Delegate a task to the Analysis specialist agent"""
         return self.analysis_agent(task)
 
+    @tool
+    def add_github_comment(self, issue_number: int, analysis_results: str) -> str:
+        """Add a comment to a GitHub issue with analysis results"""
+        comment_template = f"""## 🔍 PRISM Analysis Results
+
+{analysis_results}
+
+---
+*This analysis was performed automatically by PRISM (Provider Resource Issue Scanning & Monitoring)*"""
+        
+        return self.github_agent(f"Use add_issue_comment tool with owner='hashicorp', repo='terraform-provider-awscc', issue_number={issue_number}, body='{comment_template}'")
+
     def _create_orchestrator(self):
         """Create the main orchestrator agent"""
         return Agent(
@@ -84,11 +96,12 @@ class PRISMOrchestrator:
                 self.delegate_to_github_agent,
                 self.delegate_to_terraform_agent,
                 self.delegate_to_analysis_agent,
+                self.add_github_comment,
             ],
             system_prompt="""You are the orchestrator for AWSCC provider issue triage. 
 
 You manage three specialized agents:
-- GitHub Agent: Fetches issues and extracts configurations
+- GitHub Agent: Fetches issues, extracts configurations, and adds comments
 - Terraform Agent: Creates environments and runs terraform workflows  
 - Analysis Agent: Analyzes results and creates reports
 
@@ -97,7 +110,8 @@ Your workflow:
 2. For each issue, delegate to Terraform Agent to test configurations
 3. MANDATORY: After each terraform test, call self.cleanup_terraform_files(issue_id)
 4. Delegate to Analysis Agent to analyze results and create reports
-5. Ensure proper cleanup of AWS resources
+5. MANDATORY: Use add_github_comment with issue_number and the full analysis_results from step 4
+6. Ensure proper cleanup of AWS resources
 
 Use your delegation tools to coordinate the specialized agents and ensure comprehensive triage.""",
         )
@@ -130,7 +144,7 @@ CRITICAL REQUIREMENT:
 - Terraform Agent must query the latest provider version using Terraform MCP tools before creating any configurations
 
 WORKFLOW:
-1. Delegate to GitHub Agent to fetch recent issues (limit to {max_issues} issues)
+1. Delegate to GitHub Agent to fetch issue #2975 specifically for testing (limit to 1 issue)
 2. For each issue found:
    a. Delegate to Terraform Agent to:
       - First get the latest AWSCC provider version using Terraform MCP tools
